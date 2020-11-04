@@ -31,27 +31,37 @@ namespace akvwebapp
 
             app.UseRouting();
 
-            var options = new SecretClientOptions{
-                Retry = {
-                    Delay= TimeSpan.FromSeconds(2),
-                    MaxDelay = TimeSpan.FromSeconds(16),
-                    MaxRetries= 5,
-                    Mode = RetryMode.Exponential
-                }
-            };
+            string response = "life sucks";
 
-            var client = new SecretClient(new Uri("https://gabekeytest.vault.azure.net/"), new DefaultAzureCredential(),options);
+            try
+            {
+                var options = new SecretClientOptions{
+                    Retry = {
+                                Delay= TimeSpan.FromSeconds(2),
+                                MaxDelay = TimeSpan.FromSeconds(16),
+                                MaxRetries= 5,
+                                Mode = RetryMode.Exponential
+                    }
+                }; 
+                
+                var client = new SecretClient(new Uri("https://gabekeytest.vault.azure.net/"), new DefaultAzureCredential(),options);
+                            
+                KeyVaultSecret  Secret = client.GetSecret("mySecret");
 
-            KeyVaultSecret  Secret = client.GetSecret("mySecret");
+                response = Secret.Value;
 
-            string secretValue = Secret.Value;
+            }
+            catch(Exception ex)
+            {
+                response = ex.ToString();
+            }
 
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync(secretValue);
+                    await context.Response.WriteAsync(response);
                 });
             });
         }
