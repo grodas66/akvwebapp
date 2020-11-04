@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Core;
 
 namespace akvwebapp
 {
@@ -28,11 +31,27 @@ namespace akvwebapp
 
             app.UseRouting();
 
+            var options = new SecretClientOptions{
+                Retry = {
+                    Delay= TimeSpan.FromSeconds(2),
+                    MaxDelay = TimeSpan.FromSeconds(16),
+                    MaxRetries= 5,
+                    Mode = RetryMode.Exponential
+                }
+            };
+
+            var client = new SecretClient(new Uri("https://gabekeytest.vault.azure.net/"), new DefaultAzureCredential(),options);
+
+            KeyVaultSecret  Secret = client.GetSecret("mySecret");
+
+            string secretValue = Secret.Value;
+
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello World!");
+                    await context.Response.WriteAsync(secretValue);
                 });
             });
         }
