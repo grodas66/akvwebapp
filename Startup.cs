@@ -44,7 +44,7 @@ namespace akvwebapp
                     }
                 }; 
                 
-                var client = new SecretClient(new Uri("https://gabekeytest.vault.azure.net/"), new DefaultAzureCredential(),options);
+                var client = new SecretClient(new Uri("https://gabesecretvault.vault.azure.net/"), new DefaultAzureCredential(),options);
                             
                 KeyVaultSecret  Secret = client.GetSecret("mySecret");
 
